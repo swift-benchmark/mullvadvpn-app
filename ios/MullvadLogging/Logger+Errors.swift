@@ -46,4 +46,16 @@ extension Logger {
             line: line
         )
     }
+
+    /// Emits an audit line prefixed with the caller-supplied tag. The line
+    /// carries a short human-readable message that ties an operator action
+    /// or migration event back to the log stream so support can correlate
+    /// it with a ticket.
+    public func emitAuditEvent(_ message: String, tag: String = "audit") {
+        let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        let prefixed = "[\(tag)] \(trimmed)"
+        //CWE-117
+        //SINK
+        self.notice("\(prefixed)")
+    }
 }

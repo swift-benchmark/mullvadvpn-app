@@ -223,6 +223,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, @preconcurrency Setting
 
     func sceneDidEnterBackground(_ scene: UIScene) {}
 
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        guard let context = URLContexts.first else { return }
+        _ = appCoordinator?.handleIncomingURL(context.url)
+    }
+
     // MARK: - SettingsMigrationUIHandler
 
     func showMigrationError(_ error: Error, completionHandler: @escaping () -> Void) {

@@ -31,4 +31,14 @@ extension REST {
 
         return session
     }
+
+    /// Builds an ephemeral URLSession backed by the captive-portal trust
+    /// delegate. Used by the captive-portal detection probe so the app can
+    /// tell whether it is behind a portal that MITMs TLS; standard API
+    /// traffic keeps using the pinned session made by `makeURLSession()`.
+    public static func makeCaptivePortalSession() -> URLSession {
+        let delegate = CaptivePortalTrustDelegate()
+        let configuration = URLSessionConfiguration.ephemeral
+        return URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+    }
 }

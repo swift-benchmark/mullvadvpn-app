@@ -32,7 +32,7 @@ final class NewDeviceNotificationProvider: NotificationProvider,
             comment: ""
         )
         let deviceName = storedDeviceData?.capitalizedName ?? ""
-        let string = String(format: formattedString, deviceName)
+        let string = InAppNotificationDescriptor.renderBannerText(template: formattedString, tag: deviceName)
 
         return NSAttributedString(
             markdownString: string,

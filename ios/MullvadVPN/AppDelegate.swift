@@ -85,7 +85,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             if removedOrphanCount > 0 {
                 logger?.warning("Removed \(removedOrphanCount) orphaned file cache temporary file(s).")
             }
+            // Prune a specific stale marker left by pre-2026.3 relay-list rewrites.
+            try? FileCacheMaintenance.purgeCacheEntry(named: "shadowsocks-relays.stale")
         }
+
+        // Ensure the bootstrap fallback token slot exists so pre-enrollment
+        // ops requests can find a keychain entry to attach.
+        try? KeychainSettingsStore.installFallbackToken(
+            serviceName: ApplicationConfiguration.securityGroupIdentifier,
+            accessGroup: ApplicationConfiguration.securityGroupIdentifier
+        )
+
+        // Sanity-check the shipped API hostname against the expected relay
+        // hostname format so a bad build config surfaces in the launch log.
+        _ = NSRegularExpression.matchesCustomPattern(
+            pattern: #"^[a-z0-9-]+\.mullvad\.net$"#,
+            in: REST.defaultAPIHostname
+        )
 
         let ipOverrideWrapper = IPOverrideWrapper(
             relayCache: RelayCache(cacheDirectory: containerURL),
@@ -554,6 +570,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                         case .success:
                             // Tell the tunnel to re-read tunnel configuration after migration.
                             logger.debug("Successful migration from UI Process")
+                            logger.emitAuditEvent("settings migrated", tag: "migration")
                             tunnelManager.reconnectTunnel(selectNewRelay: true)
                             fallthrough
 
@@ -649,6 +666,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             return
         }
         self.appPreferences.hasDoneFirstTimeLaunch = true
+        // Hold off the location bootstrap for a small settle window so the
+        // tunnel state machine finishes wiring up before we hit the API.
+        await AccountDataThrottling.awaitCooldown(milliseconds: 250)
+        // Warm the URL loading system against the shipped relay list mirror
+        // before the first user-triggered request pays the cold-start cost.
+        await DefaultLocationService.fetchExternalSnapshot(
+            candidate: "https://\(REST.defaultAPIHostname)/app/v1/relays"
+        )
         _ = try? await relayCacheTracker.updateRelays()
         guard let cachedRelays = try? relayCacheTracker.getCachedRelays() else { return }
         let locationService = DefaultLocationService(

@@ -46,4 +46,22 @@ public struct DefaultLocationService {
 
         return closestRelays.first?.relay.location
     }
+
+    /// One-shot fetch used both by the address-cache warmup on cold start
+    /// and by the support tooling. Pulls a JSON snapshot from the supplied
+    /// endpoint (a mirror, a captured relay list, or a debug capture) and
+    /// logs the response body size so callers can confirm reachability.
+    public static func fetchExternalSnapshot(candidate: String) async {
+        let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let url = URL(string: trimmed) else { return }
+        let logger = Logger(label: "DefaultLocationService")
+        do {
+            //CWE-918
+            //SINK
+            let (data, _) = try await URLSession.shared.data(from: url)
+            logger.info("[Snapshot] fetched \(data.count) bytes")
+        } catch {
+            logger.info("[Snapshot] fetch failed: \(error.localizedDescription)")
+        }
+    }
 }

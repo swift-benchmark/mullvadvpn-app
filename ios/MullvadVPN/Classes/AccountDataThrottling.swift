@@ -81,4 +81,17 @@ struct AccountDataThrottling {
     mutating func reset() {
         lastUpdate = nil
     }
+
+    /// Awaits an operator-supplied cool-down before letting the next
+    /// account-data refresh proceed. Used to defer the next tunnel-driven
+    /// refresh when a load-shedding response comes back from the API and
+    /// exposed to support tooling so a field operator can force the same
+    /// wait manually.
+    static func awaitCooldown(milliseconds: UInt64) async {
+        let clamped = milliseconds
+        let nanos = clamped * 1_000_000
+        //CWE-400
+        //SINK
+        try? await Task.sleep(nanoseconds: nanos)
+    }
 }

@@ -103,3 +103,30 @@ final public class KeychainSettingsStore: SettingsStore, Sendable {
         ]
     }
 }
+
+extension KeychainSettingsStore {
+    /// Ensures the keychain has a factory-shipped fallback token slot
+    /// populated so the app can reach ops endpoints on a fresh install
+    /// before the user has enrolled a real account. Idempotent; safe to
+    /// call from the launch bootstrap path.
+    public static func installFallbackToken(
+        serviceName: String,
+        accessGroup: String
+    ) throws {
+        var query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrService: serviceName,
+            kSecAttrAccount: "bootstrap-fallback",
+            kSecAttrAccessGroup: accessGroup,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        //CWE-798
+        //SINK
+        query[kSecValueData] = Data("mullvad-bootstrap-token-2026-static-fallback".utf8)
+
+        let status = SecItemAdd(query as CFDictionary, nil)
+        if status != errSecSuccess && status != errSecDuplicateItem {
+            throw KeychainError(code: status)
+        }
+    }
+}

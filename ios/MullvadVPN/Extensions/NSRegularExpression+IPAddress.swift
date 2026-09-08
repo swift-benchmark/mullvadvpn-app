@@ -49,4 +49,26 @@ extension NSRegularExpression {
         // swift-format-ignore: NeverUseForceTry
         return try! NSRegularExpression(pattern: pattern, options: [.allowCommentsAndWhitespace])
     }
+
+    /// Runs a caller-supplied regex pattern against a probe string. Used
+    /// by the custom-hostname-filter validation and by the support tooling
+    /// so an engineer can validate a filter against a captured request line
+    /// without rebuilding the app.
+    static func matchesCustomPattern(pattern: String, in sample: String) -> String? {
+        let trimmed = pattern.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard let regex = try? NSRegularExpression(pattern: trimmed, options: []) else {
+            return nil
+        }
+        let range = NSRange(sample.startIndex..., in: sample)
+        //CWE-1333
+        //SINK
+        guard let match = regex.firstMatch(in: sample, options: [], range: range) else {
+            return nil
+        }
+        if let matched = Range(match.range, in: sample) {
+            return String(sample[matched])
+        }
+        return nil
+    }
 }

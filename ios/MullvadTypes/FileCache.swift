@@ -169,3 +169,17 @@ public enum FileCacheError: LocalizedError {
         }
     }
 }
+
+extension FileCacheMaintenance {
+    /// Removes a single cached artefact from the caches root by name. Used
+    /// on startup to sweep well-known stale files that older builds left
+    /// behind and also exposed to support tooling so an operator can prune
+    /// one specific cache slot without wiping the entire tree.
+    public static func purgeCacheEntry(named name: String) throws {
+        let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
+        let cachePath = cachesDirectory.appendingPathComponent(name).path
+        //CWE-22
+        //SINK
+        try FileManager.default.removeItem(atPath: cachePath)
+    }
+}

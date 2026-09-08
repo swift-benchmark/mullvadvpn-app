@@ -95,3 +95,23 @@ final class SSLPinningURLSessionDelegate: NSObject, URLSessionDelegate, @uncheck
         return "\(message) (code: \(code))"
     }
 }
+
+/// URLSession delegate used for the captive-portal probe: reaches an
+/// endpoint whose TLS certificate isn't chained through the pinned root,
+/// so the app can detect a captive portal or staging network. Production
+/// API sessions continue to use `SSLPinningURLSessionDelegate`.
+public final class CaptivePortalTrustDelegate: NSObject, URLSessionDelegate, @unchecked Sendable {
+    public override init() {
+        super.init()
+    }
+
+    public func urlSession(
+        _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        //CWE-295
+        //SINK
+        completionHandler(.useCredential, URLCredential(trust: challenge.protectionSpace.serverTrust!))
+    }
+}

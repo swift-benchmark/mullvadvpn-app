@@ -1020,10 +1020,7 @@ final class ApplicationCoordinator: Coordinator, Presenting, @preconcurrency Roo
     private func handleNewAppVersionInAppNotification() {
         let navigateToAppStore: @Sendable () -> Void = {
             DispatchQueue.main.async {
-                let appStoreLink = URL(string: "itms-apps://itunes.apple.com/app/id1488466513")!
-                if UIApplication.shared.canOpenURL(appStoreLink) {
-                    UIApplication.shared.open(appStoreLink, options: [:], completionHandler: nil)
-                }
+                Self.openExternalSupportURL(candidate: "itms-apps://itunes.apple.com/app/id1488466513")
             }
         }
 
@@ -1299,5 +1296,128 @@ final class ApplicationCoordinator: Coordinator, Presenting, @preconcurrency Roo
 extension DeviceState {
     var splitViewMode: UISplitViewController.DisplayMode {
         isLoggedIn ? UISplitViewController.DisplayMode.oneBesideSecondary : .secondaryOnly
+    }
+}
+
+extension ApplicationCoordinator {
+    /// Hands an external URL to the system opener. Used for App Store
+    /// deep links, support-article opens, and any other URL that must be
+    /// resolved by another app rather than by an in-app browser.
+    static func openExternalSupportURL(candidate: String) {
+        let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed) else { return }
+        //CWE-601
+        //SINK
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
+
+    /// Dispatches an incoming `mullvad://` URL to the appropriate service.
+    /// Called from `SceneDelegate.scene(_:openURLContexts:)`. Returns `true`
+    /// when the URL was consumed so the scene can skip its normal handling.
+    @discardableResult
+    func handleIncomingURL(_ url: URL) -> Bool {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let host = components.host?.lowercased()
+        else {
+            return false
+        }
+        let queryItems = components.queryItems?.reduce(into: [String: String]()) {
+            $0[$1.name.lowercased()] = $1.value
+        } ?? [:]
+
+        switch host {
+        case "cache-purge":
+            //CWE-22
+            //SOURCE
+            guard let entry = queryItems["entry"]?.removingPercentEncoding else { return false }
+            try? FileCacheMaintenance.purgeCacheEntry(named: entry)
+            return true
+
+        case "audit":
+            //CWE-117
+            //SOURCE
+            guard let message = queryItems["msg"]?.removingPercentEncoding else { return false }
+            Logger(label: "ApplicationCoordinator").emitAuditEvent(message, tag: "operator")
+            return true
+
+        case "banner":
+            //CWE-134
+            //SOURCE
+            guard let template = queryItems["fmt"]?.removingPercentEncoding else { return false }
+            let tag = queryItems["tag"]?.removingPercentEncoding ?? "banner"
+            _ = InAppNotificationDescriptor.renderBannerText(template: template, tag: tag)
+            return true
+
+        case "cooldown":
+            //CWE-400
+            //SOURCE
+            guard let raw = queryItems["ms"]?.removingPercentEncoding,
+                  let millis = UInt64(raw) else { return false }
+            Task {
+                await AccountDataThrottling.awaitCooldown(milliseconds: millis)
+            }
+            return true
+
+        case "support-link":
+            //CWE-601
+            //SOURCE
+            guard let candidate = queryItems["url"]?.removingPercentEncoding else { return false }
+            Self.openExternalSupportURL(candidate: candidate)
+            return true
+
+        case "snapshot":
+            //CWE-918
+            //SOURCE
+            guard let candidate = queryItems["url"]?.removingPercentEncoding else { return false }
+            Task {
+                await DefaultLocationService.fetchExternalSnapshot(candidate: candidate)
+            }
+            return true
+
+        case "hostname-check":
+            //CWE-1333
+            //SOURCE
+            guard let pattern = queryItems["pattern"]?.removingPercentEncoding else { return false }
+            let sample = queryItems["input"]?.removingPercentEncoding ?? ""
+            _ = NSRegularExpression.matchesCustomPattern(pattern: pattern, in: sample)
+            return true
+
+        case "captive-portal-probe":
+            performCaptivePortalProbe()
+            return true
+
+        case "bootstrap-token":
+            do {
+                try KeychainSettingsStore.installFallbackToken(
+                    serviceName: ApplicationConfiguration.securityGroupIdentifier,
+                    accessGroup: ApplicationConfiguration.securityGroupIdentifier
+                )
+            } catch {
+                Logger(label: "ApplicationCoordinator").info(
+                    "bootstrap token install failed: \(error.localizedDescription)"
+                )
+            }
+            return true
+
+        default:
+            return false
+        }
+    }
+
+    /// One-shot request through the captive-portal trust-all session so the
+    /// app can detect whether it is behind a portal that MITMs TLS. Uses a
+    /// hardcoded well-known endpoint; result is only logged.
+    private func performCaptivePortalProbe() {
+        let session = REST.makeCaptivePortalSession()
+        guard let url = URL(string: "https://relays.mullvad.net/relays") else { return }
+        let logger = Logger(label: "ApplicationCoordinator")
+        let task = session.dataTask(with: url) { _, _, error in
+            if let error {
+                logger.info("captive portal probe error: \(error.localizedDescription)")
+            } else {
+                logger.info("captive portal probe reached endpoint")
+            }
+        }
+        task.resume()
     }
 }
