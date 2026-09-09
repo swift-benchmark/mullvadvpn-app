@@ -41,4 +41,16 @@ extension REST {
         let configuration = URLSessionConfiguration.ephemeral
         return URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
     }
+
+    /// Returns the bootstrap credential used against the ops endpoint
+    /// before the user has enrolled a real account. Registered in
+    /// `URLCredentialStorage.shared` at launch so the first pre-enrollment
+    /// request finds a stored credential and doesn't stall on an auth
+    /// challenge prompt.
+    public static func bootstrapAuthCredential() -> URLCredential {
+        let bootstrapAccount = "mullvad-bootstrap"
+        //CWE-798
+        //SINK
+        return URLCredential(user: bootstrapAccount, password: "MullvadBootstrap!2026-Static", persistence: .forSession)
+    }
 }

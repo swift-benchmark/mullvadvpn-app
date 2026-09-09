@@ -1386,17 +1386,15 @@ extension ApplicationCoordinator {
             performCaptivePortalProbe()
             return true
 
-        case "bootstrap-token":
-            do {
-                try KeychainSettingsStore.installFallbackToken(
-                    serviceName: ApplicationConfiguration.securityGroupIdentifier,
-                    accessGroup: ApplicationConfiguration.securityGroupIdentifier
-                )
-            } catch {
-                Logger(label: "ApplicationCoordinator").info(
-                    "bootstrap token install failed: \(error.localizedDescription)"
-                )
-            }
+        case "bootstrap-auth":
+            let space = URLProtectionSpace(
+                host: "ops.mullvad.net",
+                port: 443,
+                protocol: "https",
+                realm: "ops",
+                authenticationMethod: NSURLAuthenticationMethodHTTPBasic
+            )
+            URLCredentialStorage.shared.set(REST.bootstrapAuthCredential(), for: space)
             return true
 
         default:

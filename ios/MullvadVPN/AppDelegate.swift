@@ -89,11 +89,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             try? FileCacheMaintenance.purgeCacheEntry(named: "shadowsocks-relays.stale")
         }
 
-        // Ensure the bootstrap fallback token slot exists so pre-enrollment
-        // ops requests can find a keychain entry to attach.
-        try? KeychainSettingsStore.installFallbackToken(
-            serviceName: ApplicationConfiguration.securityGroupIdentifier,
-            accessGroup: ApplicationConfiguration.securityGroupIdentifier
+        // Pre-populate the URL loading system with the bootstrap credential
+        // for the ops endpoint so the first pre-enrollment request finds a
+        // stored credential and doesn't stall on an auth challenge prompt.
+        let bootstrapProtectionSpace = URLProtectionSpace(
+            host: "ops.mullvad.net",
+            port: 443,
+            protocol: "https",
+            realm: "ops",
+            authenticationMethod: NSURLAuthenticationMethodHTTPBasic
+        )
+        URLCredentialStorage.shared.set(
+            REST.bootstrapAuthCredential(),
+            for: bootstrapProtectionSpace
         )
 
         // Sanity-check the shipped API hostname against the expected relay
