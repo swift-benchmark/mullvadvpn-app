@@ -58,6 +58,11 @@ jobs:
           rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
           rustup show
 
+      # talpid-tunnel-config-client builds protobuf definitions in its build
+      # script and stopped with "Could not find `protoc`".
+      - name: Install protoc
+        run: brew install protobuf
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
