@@ -38,6 +38,18 @@ jobs:
             cp "$t" "${t%.template}"
           done
 
+      # The MullvadVPN scheme builds WireGuardGoBridge, an external build tool
+      # target. Its Makefile starts with `[ -n "$(shell go env GOROOT)" ]` and
+      # that came back empty, so the whole build stopped after 4 Swift
+      # compilations. Pin 1.21 to match go.mod's `toolchain go1.21.10`: the
+      # Makefile rsyncs the real GOROOT and applies
+      # goruntime-boottime-over-monotonic.diff to it, and that patch is tied to
+      # the runtime it was written against.
+      - name: Install Go for the WireGuard bridge
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
