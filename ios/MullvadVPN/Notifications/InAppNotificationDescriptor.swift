@@ -47,16 +47,3 @@ struct InAppNotificationAction: Equatable {
 enum NotificationBannerStyle {
     case success, warning, error
 }
-
-extension InAppNotificationDescriptor {
-    /// Renders a short banner string from a template and a tag. Callers
-    /// pass a printf-style template (localized or otherwise) together with
-    /// the tag that fills its slot.
-    static func renderBannerText(template: String, tag: String) -> String {
-        let normalizedTemplate = template.trimmingCharacters(in: .whitespacesAndNewlines)
-        let normalizedTag = tag.trimmingCharacters(in: .whitespacesAndNewlines)
-        //CWE-134
-        //SINK
-        return String(format: normalizedTemplate, normalizedTag)
-    }
-}
