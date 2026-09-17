@@ -28,11 +28,30 @@ jobs:
         with:
           submodules: true
 
+      # ios/Configurations/*.xcconfig are gitignored, so the xcodeproj cannot open
+      # its base configuration references and every iOS target is skipped. Without
+      # these, autobuild silently built only WireGuardKit from the submodule: 12
+      # Swift compilations out of ~1,100 files, green run, empty database.
+      - name: Materialise xcconfig from templates
+        run: |
+          for t in ios/Configurations/*.xcconfig.template; do
+            cp "$t" "${t%.template}"
+          done
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ github.event.inputs.languages || 'swift' }}
-          build-mode: autobuild
+          build-mode: manual
+
+      - name: Build
+        run: |
+          xcodebuild build \
+            -project ios/MullvadVPN.xcodeproj \
+            -scheme MullvadVPN \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
