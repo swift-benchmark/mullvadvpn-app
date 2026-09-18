@@ -665,6 +665,7 @@
 		7A9CCCC12A96302800DD6A34 /* AccountCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCAF2A96302800DD6A34 /* AccountCoordinator.swift */; };
 		7A9CCCC22A96302800DD6A34 /* SafariCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB02A96302800DD6A34 /* SafariCoordinator.swift */; };
 		7A9CCCC32A96302800DD6A34 /* ApplicationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB12A96302800DD6A34 /* ApplicationCoordinator.swift */; };
+		F0C0DE000000000000000134 /* InAppNotificationDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B26E1D2943514300D5980C /* InAppNotificationDescriptor.swift */; };
 		7A9CCCC42A96302800DD6A34 /* TunnelCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB22A96302800DD6A34 /* TunnelCoordinator.swift */; };
 		7A9ED2A72F3CA781005BC0D9 /* NewAppVersionSystemNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9ED2A62F3CA77B005BC0D9 /* NewAppVersionSystemNotificationHandler.swift */; };
 		7A9ED2A92F433D1B005BC0D9 /* NotificationProviderIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C2AEFC2A0BB5CC00986207 /* NotificationProviderIdentifier.swift */; };
@@ -6730,6 +6731,7 @@
 				58E511E628DDDEAC00B0BCDE /* CodingErrors+CustomErrorDescription.swift in Sources */,
 				58C76A0B2A338E4300100D75 /* BackgroundTask.swift in Sources */,
 				7A9CCCC32A96302800DD6A34 /* ApplicationCoordinator.swift in Sources */,
+				F0C0DE000000000000000134 /* InAppNotificationDescriptor.swift in Sources */,
 				5864AF0729C78843005B0CD9 /* SettingsCellFactory.swift in Sources */,
 				587B75412668FD7800DEF7E9 /* AccountExpirySystemNotificationProvider.swift in Sources */,
 				7ACC21612FEE855300DB25F5 /* RelayFilterView.swift in Sources */,
