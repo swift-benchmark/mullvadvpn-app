@@ -665,7 +665,7 @@
 		7A9CCCC12A96302800DD6A34 /* AccountCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCAF2A96302800DD6A34 /* AccountCoordinator.swift */; };
 		7A9CCCC22A96302800DD6A34 /* SafariCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB02A96302800DD6A34 /* SafariCoordinator.swift */; };
 		7A9CCCC32A96302800DD6A34 /* ApplicationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB12A96302800DD6A34 /* ApplicationCoordinator.swift */; };
-		F0C0DE000000000000000134 /* InAppNotificationDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B26E1D2943514300D5980C /* InAppNotificationDescriptor.swift */; };
+		F0C0DE000000000000000134 /* InAppNotificationDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C0DE000000000000000135 /* InAppNotificationDescriptor.swift */; };
 		7A9CCCC42A96302800DD6A34 /* TunnelCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9CCCB22A96302800DD6A34 /* TunnelCoordinator.swift */; };
 		7A9ED2A72F3CA781005BC0D9 /* NewAppVersionSystemNotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A9ED2A62F3CA77B005BC0D9 /* NewAppVersionSystemNotificationHandler.swift */; };
 		7A9ED2A92F433D1B005BC0D9 /* NotificationProviderIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0C2AEFC2A0BB5CC00986207 /* NotificationProviderIdentifier.swift */; };
@@ -2090,6 +2090,7 @@
 		58AFC99629F9753D000829DE /* AsyncResultBlockOperationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncResultBlockOperationTests.swift; sourceTree = "<group>"; };
 		58B0A2A0238EE67E00BC001D /* MullvadVPNTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MullvadVPNTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		58B0A2A4238EE67E00BC001D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0C0DE000000000000000135 /* InAppNotificationDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppNotificationDescriptor.swift; sourceTree = "<group>"; };
 		58B26E1D2943514300D5980C /* InAppNotificationDescriptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppNotificationDescriptor.swift; sourceTree = "<group>"; };
 		58B26E21294351EA00D5980C /* InAppNotificationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InAppNotificationProvider.swift; sourceTree = "<group>"; };
 		58B26E232943520C00D5980C /* NotificationProviderProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationProviderProtocol.swift; sourceTree = "<group>"; };
@@ -4031,6 +4032,7 @@
 				587B7535266528A200DEF7E9 /* NotificationManager.swift */,
 				58B26E232943520C00D5980C /* NotificationProviderProtocol.swift */,
 				58B26E252943522400D5980C /* NotificationProvider.swift */,
+				F0C0DE000000000000000135 /* InAppNotificationDescriptor.swift */,
 				58B26E21294351EA00D5980C /* InAppNotificationProvider.swift */,
 				58B26E272943527300D5980C /* SystemNotificationProvider.swift */,
 				5877F94D2A0A59AA0052D9E9 /* NotificationResponse.swift */,
